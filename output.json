@@ -1,1 +1,0 @@
-{"error":{"root_cause":[{"type":"illegal_argument_exception","reason":"Malformed action/metadata line [3], expected START_OBJECT but found [VALUE_STRING]"}],"type":"illegal_argument_exception","reason":"Malformed action/metadata line [3], expected START_OBJECT but found [VALUE_STRING]"},"status":400}

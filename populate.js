@@ -1,32 +1,54 @@
-const {getBrands} = require('node-car-api');
-const {getModels} = require('node-car-api');
-const jsonfile = require('jsonfile');
-const file = 'car2.json';
+const {
+  getBrands,
+  getModels
+} = require('node-car-api');
 
-async function populate() {
+var client = require('./connection.js');
+
+
+exports.insertData = async (callback) => {
+  console.log('Populate in progress...')
   const brands = await getBrands();
-  
-  /*brands.forEach( async brand => {
-	  const models = await getModels(brand);
-	  models.forEach( model => {
-		  jsonfile.writeFile(file, model, {spaces: 2, flag: 'a'}, function(err) {
-			  if (err){
-				  console.error(err)
-			  }
-			})
-	  })
-  })*/
-  
-for(var i = 0; i < brands.length; i++) {	
-	var models = await getModels(brands[i]);
-	for(var j = 0; j < models.length; j++){
-			jsonfile.writeFile(file, models[j], {spaces: 2, flag: 'a'}, function(err) {
-			  if (err){
-				  console.error(err)
-			  }
-			})
-		}		
-	}
-}	
+  var cars = [];
+  var id = 1;
+  for (var i = 0; i < brands.length; i++) {
+    const models = await getModels(brands[i]);
 
-populate();
+    for (var j = 0; j < models.length; j++) {
+      cars.push({
+        index: {
+          _index: 'cars',
+          _type: 'car',
+          _id: id
+        }
+      });
+      cars.push(models[j]);
+      id++;
+    }
+  }
+
+  console.log('\nSending data to ElasticSearch...')
+  client.bulk({
+    body: cars
+  }, function(error, response) {
+    if (error) {
+      console.error(error);
+      return;
+    } else {
+      console.log('\nDone !');
+    }
+  });
+  mapping = {
+        'index': 'cars',
+        'type': 'car',
+        'body': {
+            'properties': {
+                'volume': {
+                    'type': 'text',
+                    'fielddata': true
+                }
+            }
+        }
+    }
+  client.indices.putMapping(mapping);
+}

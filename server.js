@@ -1,28 +1,26 @@
-var express = require('express');
-var client = require('./connection.js');
-var hostname = 'localhost';
-var port = 9292;
+const bodyParser = require('body-parser')
+const express = require('express')
+const app = express();
+const populate = require('./populate')
+const suv = require('./suv')
+const port = 9292
 
-var app = express();
+app.use(bodyParser.json())
 
-app.route("/suv")
-    .get(function (req, res) {
-        var query = {
-            "sort": [
-                {
-                    "volume": { "order": "desc" }
-                }
-            ]
-        }
-        client.search({
-            index : "cars",
-            type : "car",
-            body : query
-        },(err,resp)=>{
-            res.send(resp)
-        });
-    })
 
-app.listen(port, hostname, function () {
-    console.log("Listening on port " + port + " ...");
-});
+app.get('/populate', (req, res) => {
+  populate.insertData((err, results) => {
+    res.json(results);
+  })
+})
+
+app.get('/suv', (req, res) => {
+  suv.sortSuv((err, results) => {
+    res.json(results)
+  })
+})
+
+
+app.listen(port, () => {
+  console.log("Listening on port " + port + " ...");
+})

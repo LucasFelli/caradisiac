@@ -1,1 +1,0 @@
-curl -XPUT "localhost:9200/_bulk" -H "Content-Type: application/json" --data-binary @car.json -o output.json
